@@ -80,3 +80,5 @@ func (ws Wallets) AddWallet() string {
 	ws.Wallets[address] = wallet
 	return address
 }
+
+// TODO link wallet with block mining
