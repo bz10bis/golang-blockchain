@@ -9,19 +9,6 @@ import (
 	"log"
 )
 
-// TxOutput contain the value of the transaction and the key to access it
-type TxOutput struct {
-	Value  int
-	PubKey string
-}
-
-// TxInput contain the ID of the tx the index of the output and the signature
-type TxInput struct {
-	ID  []byte
-	Out int
-	Sig string
-}
-
 // Transaction is a combination of an input and an output and an ID
 type Transaction struct {
 	ID      []byte
@@ -91,14 +78,4 @@ func (tx *Transaction) SetID() {
 // IsCoinbase check if a specific transaction is the coinbase or not
 func (tx *Transaction) IsCoinbase() bool {
 	return len(tx.Inputs) == 1 && len(tx.Inputs[0].ID) == 0 && tx.Inputs[0].Out == -1
-}
-
-// CanUnlock check if the account in "data" can access the tx
-func (in *TxInput) CanUnlock(data string) bool {
-	return in.Sig == data
-}
-
-// CanBeUnlocked check if the account in "data" can access the tx
-func (out *TxOutput) CanBeUnlocked(data string) bool {
-	return out.PubKey == data
 }
