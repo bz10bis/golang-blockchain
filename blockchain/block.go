@@ -2,6 +2,7 @@ package blockchain
 
 import (
 	"bytes"
+	"crypto/sha256"
 	"encoding/gob"
 	"log"
 )
@@ -10,10 +11,10 @@ import (
 // it contain the previous block hash, the data inside the block
 // and the current Hash wich is a combination of current data and previous hash
 type Block struct {
-	Hash     []byte
-	Data     []byte
-	PrevHash []byte
-	Nonce    int
+	Hash         []byte
+	Transactions []*Transaction
+	PrevHash     []byte
+	Nonce        int
 }
 
 // Functions
@@ -26,8 +27,8 @@ func Handle(err error) {
 }
 
 // CreateBlock create a new block and return a pointer to that block
-func CreateBlock(data string, prevHash []byte) *Block {
-	block := &Block{[]byte{}, []byte(data), prevHash, 0}
+func CreateBlock(txs []*Transaction, prevHash []byte) *Block {
+	block := &Block{[]byte{}, txs, prevHash, 0}
 	// block.DeriveHash()
 	pow := NewProof(block)
 	nonce, hash := pow.Run()
@@ -36,9 +37,9 @@ func CreateBlock(data string, prevHash []byte) *Block {
 	return block
 }
 
-// Genesis create the first block of the blockchain
-func Genesis() *Block {
-	return CreateBlock("Genesis", []byte{})
+// Genesis create the first block of the blockchain and set the coinbase tx
+func Genesis(coinbase *Transaction) *Block {
+	return CreateBlock([]*Transaction{coinbase}, []byte{})
 }
 
 // Deserialize take data from badgerdb and convert it to a block
@@ -59,4 +60,16 @@ func (b *Block) Serialize() []byte {
 	err := encoder.Encode(b)
 	Handle(err)
 	return res.Bytes()
+}
+
+// HashTransaction return the sha256 of all transactions
+func (b *Block) HashTransaction() []byte {
+	var txHashes [][]byte
+	var txHash [32]byte
+
+	for _, tx := range b.Transactions {
+		txHashes = append(txHashes, tx.ID)
+	}
+	txHash = sha256.Sum256(bytes.Join(txHashes, []byte{}))
+	return txHash[:]
 }
