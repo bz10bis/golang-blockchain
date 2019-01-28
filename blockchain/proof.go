@@ -21,6 +21,7 @@ import (
 // to mine and by extension the time to mine a block
 const Difficulty = 12
 
+// ProofOfWork contain a block and the target aimed to sign this block
 type ProofOfWork struct {
 	Block  *Block
 	Target *big.Int
@@ -28,6 +29,7 @@ type ProofOfWork struct {
 
 // Function
 
+// NewProof take a bloc and create a target for it
 func NewProof(b *Block) *ProofOfWork {
 	target := big.NewInt(1)
 	target.Lsh(target, uint(256-Difficulty))
@@ -35,6 +37,7 @@ func NewProof(b *Block) *ProofOfWork {
 	return pow
 }
 
+// ToHex Change int value to bigEndian values
 func ToHex(num int64) []byte {
 	buff := new(bytes.Buffer)
 	err := binary.Write(buff, binary.BigEndian, num)
@@ -46,6 +49,7 @@ func ToHex(num int64) []byte {
 
 // Methods
 
+// InitData join all info into one slice of bytes
 func (pow *ProofOfWork) InitData(nonce int) []byte {
 	data := bytes.Join(
 		[][]byte{
@@ -59,6 +63,7 @@ func (pow *ProofOfWork) InitData(nonce int) []byte {
 	return data
 }
 
+// Run take a slice of byte and try to find the target
 func (pow *ProofOfWork) Run() (int, []byte) {
 	var intHash big.Int
 	var hash [32]byte
@@ -80,6 +85,7 @@ func (pow *ProofOfWork) Run() (int, []byte) {
 	return nonce, hash[:]
 }
 
+// Validate take a proof of work and check if the awnser is Valid
 func (pow *ProofOfWork) Validate() bool {
 	var intHash big.Int
 	data := pow.InitData(pow.Block.Nonce)
